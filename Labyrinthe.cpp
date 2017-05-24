@@ -20,16 +20,19 @@ void Cell::changeId(unsigned int id, Cell* source){
 }
 
 void Cell::openWallTo(Cell* target){
-    if( sqrDistanceTo(target) == 1 )
-    {
 
+    if( sqrDistanceTo(target) == 1 ) //verification que target est bien adjacente
+    {
+      /*suivant leurs positions relatives, on ouvre tel ou tel mur */
       if( posX > target->posX ){ walls[W] = false; target->walls[E] = false; }
       else if( posX < target->posX ){ walls[E] = false; target->walls[W] = false; }
       else if( posY > target->posY ){ walls[N] = false; target->walls[S] = false; }
       else if( posY < target->posY ){ walls[S] = false; target->walls[N] = false; }
 
+     /*on link les deux cellules entre elles*/
       linked.insert(target);
       target->linked.insert(this);
+
       target->changeId(id,this);
     }
 }
@@ -64,7 +67,7 @@ Cell* Labyrinthe::getCellAt(unsigned int x , unsigned int y){
 
 Cell* Labyrinthe::getRandomCellCard(Cell* source){
     Cell* target = source;
-    unsigned int exc1,exc2,card=0;
+    unsigned int exc1,exc2,card=0; //exc1 et exc2 represente les directions où il sera impossible de liberer un mur suivant la disposition
 
     if( source->getX() == 0 && source->getY() == 0 ){exc1=N;exc2=W;}
     else if( source->getX() == 0 && source->getY() == sizeY-1){exc1=S;exc2=W;}
@@ -77,7 +80,7 @@ Cell* Labyrinthe::getRandomCellCard(Cell* source){
     else { exc1=NONE;exc2=NONE; }
 
     do {
-      card = distribCard(generator);
+      card = distribCard(generator); //on tir une direction au hasard
       switch(card)
       {
         case N : if(source->getY() > 0) target = cells_array[source->getX()][source->getY()-1]; break;
@@ -86,7 +89,7 @@ Cell* Labyrinthe::getRandomCellCard(Cell* source){
         case W : if(source->getX() > 0) target = cells_array[source->getX()-1][source->getY()]; break;
       }
 
-    } while(card == exc1 || card == exc2 );
+    } while(card == exc1 || card == exc2 ); //tant que la direction tirée est impossible à ouvrir , on recommence (TODO : creation d'une petite liste d'exclusion pour ne passer qu'au maximum 4 fois dans la boucle)
 
     if( source->getId() == target->getId() )return source;
 
